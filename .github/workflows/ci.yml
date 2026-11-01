@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Weekly drift check: the baseline should stay valid against the current release.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-verification:
+    name: Source verification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install tooling
+        run: npm ci
+      - name: Verify Apex, XML, JSON and metadata pairing
+        run: npm run verify
+
+  credentials:
+    name: Check Dev Hub credentials
+    runs-on: ubuntu-latest
+    outputs:
+      available: ${{ steps.check.outputs.available }}
+    steps:
+      - id: check
+        env:
+          SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
+        run: |
+          if [ -n "$SFDX_AUTH_URL" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "SFDX_AUTH_URL is not set. Skipping scratch org validation; set the secret to enable it."
+          fi
+
+  scratch-org:
+    name: Deploy and run Apex tests
+    runs-on: ubuntu-latest
+    needs: [static-verification, credentials]
+    if: needs.credentials.outputs.available == 'true'
+    env:
+      SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Salesforce CLI
+        run: npm install --global @salesforce/cli
+      - name: Authenticate Dev Hub
+        run: |
+          printf '%s' "$SFDX_AUTH_URL" > "$RUNNER_TEMP/sfdx-auth-url"
+          sf org login sfdx-url --sfdx-url-file "$RUNNER_TEMP/sfdx-auth-url" --alias devhub --no-prompt
+      - name: Create scratch org
+        run: |
+          sf org create scratch \
+            --definition-file config/project-scratch-def.json \
+            --alias ci \
+            --duration-days 1 \
+            --set-default \
+            --wait 20
+      - name: Deploy source
+        run: sf project deploy start --source-dir force-app --wait 30
+      - name: Run Apex tests
+        run: sf apex run test --test-level RunLocalTests --code-coverage --result-format human --wait 30
+      - name: Delete scratch org
+        if: always()
+        run: sf org delete scratch --target-org ci --no-prompt

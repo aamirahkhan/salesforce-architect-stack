@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Correlation_Id__c</fullName>
+    <description>Ties together every log entry produced by one integration call or user action.</description>
+    <label>Correlation Id</label>
+    <length>36</length>
+    <type>Text</type>
+</CustomField>

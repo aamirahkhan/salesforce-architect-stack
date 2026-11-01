@@ -1,0 +1,20 @@
+{
+  "name": "salesforce-architect-stack",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Reference Salesforce architecture: layered Apex framework, metadata-driven triggers, selectors, unit of work, async jobs, logging and security guardrails.",
+  "scripts": {
+    "verify": "node tools/verify-source.mjs",
+    "format": "prettier --write \"**/*.{cls,trigger,html,js,json,md,yml,yaml,xml}\"",
+    "format:check": "prettier --check \"**/*.{cls,trigger,html,js,json,md,yml,yaml,xml}\""
+  },
+  "devDependencies": {
+    "@apexdevtools/apex-parser": "^5.3.0",
+    "fast-xml-parser": "^5.3.0",
+    "prettier": "^3.9.10",
+    "prettier-plugin-apex": "^2.3.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

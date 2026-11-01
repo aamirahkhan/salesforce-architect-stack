@@ -1,0 +1,30 @@
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Salesforce CLI
+.sfdx/
+.sf/
+.sfdx/typings/
+.localdev.apex
+*.log
+
+# Environment and credentials
+.env
+.env.*
+*.authurl
+
+# Test and coverage output
+coverage/
+test-results/
+output/
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json

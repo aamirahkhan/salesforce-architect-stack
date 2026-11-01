@@ -1,0 +1,8 @@
+# Files excluded when deploying or retrieving source.
+package.xml
+**/jsconfig.json
+**/.eslintrc.json
+**/.prettierrc
+**/.prettierignore
+**/README.md
+**/node_modules
