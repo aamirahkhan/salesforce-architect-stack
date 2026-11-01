@@ -10,7 +10,7 @@ Every Salesforce project I have worked on eventually grows a trigger framework. 
 
 This article walks through the baseline I built to stop rebuilding that contract on every project. It is deliberately small: 21 production Apex classes, 10 test classes, one trigger, custom metadata for configuration, and a permission set. The interesting parts are the decisions, not the class count.
 
-![Animated request flow from AccountTrigger through TriggerDispatcher, TriggerHandler, AccountDomain, AccountService and LogService](https://raw.githubusercontent.com/aamirahkhan/salesforce-architect-stack/main/assets/gifs/trigger-flow.gif)
+![Animated request flow from AccountTrigger through TriggerDispatcher, TriggerHandler, AccountDomain, AccountService and LogService](https://raw.githubusercontent.com/aamirahkhan/salesforce-architect-stack/main/assets/gifs/trigger-flow-v2.gif)
 
 ## The requirements
 

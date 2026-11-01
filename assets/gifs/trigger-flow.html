@@ -15,8 +15,14 @@
         --muted: #8da1bd;
         --accent: #4aa3ff;
         --green: #3ddc97;
+        --amber: #f4b860;
         --mono: "SFMono-Regular", "SF Mono", Menlo, Consolas, monospace;
         --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+
+        /* Strong custom curves, not the built-in CSS easings. */
+        --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+        --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+        --travel: 380ms;
     }
 
     * { box-sizing: border-box; }
@@ -140,55 +146,69 @@
         );
     }
 
+    /* One element carries the highlight. It is moved with transform, never top. */
     .dot {
         position: absolute;
         left: 50%;
-        top: 23px;
+        top: 0;
         width: 9px;
         height: 9px;
         border-radius: 50%;
-        transform: translate(-50%, -50%);
+        transform: translate(-50%, 23px);
         background: var(--accent);
         box-shadow:
             0 0 0 4px rgba(74, 163, 255, 0.12),
             0 0 18px rgba(74, 163, 255, 0.9);
-        transition: top 380ms cubic-bezier(0.22, 0.8, 0.24, 1);
+        transition:
+            transform var(--travel) var(--ease-in-out),
+            opacity 180ms var(--ease-out);
     }
 
     .steps {
+        position: relative;
         display: flex;
         flex-direction: column;
         gap: 8px;
     }
 
+    .highlight {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 46px;
+        border: 1px solid var(--border-active);
+        border-radius: 9px;
+        background: var(--panel-active);
+        box-shadow:
+            0 0 0 1px rgba(74, 163, 255, 0.12),
+            0 10px 28px rgba(0, 0, 0, 0.3);
+        transform: translateY(0);
+        transition:
+            transform var(--travel) var(--ease-in-out),
+            opacity 180ms var(--ease-out);
+        pointer-events: none;
+    }
+
+    .highlight[data-tone="green"] { border-color: rgba(61, 220, 151, 0.62); }
+    .highlight[data-tone="amber"] { border-color: rgba(244, 184, 96, 0.62); }
+
     .step {
+        position: relative;
+        z-index: 1;
         height: 46px;
         display: flex;
         align-items: center;
         gap: 12px;
         padding: 0 14px 0 10px;
-        border: 1px solid var(--border);
+        border: 1px solid transparent;
         border-radius: 9px;
-        background: var(--panel);
-        opacity: 0.5;
-        transform: translateX(0);
-        transition:
-            opacity 260ms ease,
-            transform 320ms cubic-bezier(0.22, 0.8, 0.24, 1),
-            border-color 260ms ease,
-            background 260ms ease,
-            box-shadow 260ms ease;
+        background: transparent;
+        opacity: 0.55;
+        transition: opacity 240ms var(--ease-out);
     }
 
-    .step.active {
-        opacity: 1;
-        transform: translateX(3px);
-        border-color: var(--border-active);
-        background: var(--panel-active);
-        box-shadow:
-            0 0 0 1px rgba(74, 163, 255, 0.12),
-            0 10px 28px rgba(0, 0, 0, 0.3);
-    }
+    .step.is-active { opacity: 1; }
 
     .num {
         flex: 0 0 24px;
@@ -201,13 +221,6 @@
         color: var(--muted);
         border: 1px solid rgba(140, 165, 200, 0.2);
         background: rgba(8, 14, 24, 0.7);
-        transition: color 260ms ease, border-color 260ms ease, background 260ms ease;
-    }
-
-    .step.active .num {
-        color: #06101f;
-        border-color: var(--accent);
-        background: var(--accent);
     }
 
     .content {
@@ -235,23 +248,10 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        transition: color 260ms ease;
+        transition: color 240ms ease;
     }
 
-    .step.active .desc { color: #b9cae0; }
-
-    .step[data-tone="green"].active { border-color: rgba(61, 220, 151, 0.62); }
-    .step[data-tone="green"].active .num {
-        border-color: var(--green);
-        background: var(--green);
-        color: #04130d;
-    }
-    .step[data-tone="amber"].active { border-color: rgba(244, 184, 96, 0.62); }
-    .step[data-tone="amber"].active .num {
-        border-color: #f4b860;
-        background: #f4b860;
-        color: #1a1004;
-    }
+    .step.is-active .desc { color: #b9cae0; }
 
     footer {
         display: flex;
@@ -266,6 +266,13 @@
     }
 
     .footer-right { color: rgba(74, 163, 255, 0.85); }
+
+    /* The GIF cannot honor this, but the source page can. */
+    @media (prefers-reduced-motion: reduce) {
+        .dot, .highlight { display: none; }
+        .step { opacity: 1; transition: none; }
+        .desc { transition: none; }
+    }
 </style>
 </head>
 <body>
@@ -280,8 +287,9 @@
     </header>
 
     <div class="flow" id="flow">
-        <div class="rail"><span class="dot" id="dot"></span></div>
+        <div class="rail"><span class="dot" id="dot" aria-hidden="true"></span></div>
         <div class="steps" id="steps">
+            <span class="highlight" id="highlight" data-tone="blue" aria-hidden="true"></span>
             <div class="step" data-tone="blue">
                 <div class="num">01</div>
                 <div class="content">
@@ -342,37 +350,92 @@
 
 <script>
     const steps = Array.from(document.querySelectorAll('.step'));
+    const highlight = document.getElementById('highlight');
     const dot = document.getElementById('dot');
-    const flow = document.getElementById('flow');
-    const STEP_MS = 1150;
+
+    const STEP_GAP = 54;       // 46px row + 8px gap
+    const DOT_OFFSET = 23;
+    const STEP_MS = 1000;      // enough time to read each row
+    const PRE_ROLL_MS = 800;   // hold the first row before cycling
+    const LAST_HOLD_MS = 800;  // hold LogService before the reset
+    const RESET_FADE_MS = 180; // opacity-only reset, no reverse sweep
+
+    let stepTimer = null;
+    let cycleTimer = null;
+    let resetTimer = null;
     let index = 0;
-    let timer = null;
 
-    function activate(nextIndex) {
+    function stopTimers() {
+        window.clearTimeout(stepTimer);
+        window.clearTimeout(cycleTimer);
+        window.clearTimeout(resetTimer);
+    }
+
+    function setActive(nextIndex) {
+        index = nextIndex;
         steps.forEach((step, position) => {
-            step.classList.toggle('active', position === nextIndex);
+            step.classList.toggle('is-active', position === nextIndex);
         });
-
-        const activeStep = steps[nextIndex];
-        const stepRect = activeStep.getBoundingClientRect();
-        const flowRect = flow.getBoundingClientRect();
-        dot.style.top = `${stepRect.top - flowRect.top + stepRect.height / 2}px`;
+        highlight.dataset.tone = steps[nextIndex].dataset.tone || 'blue';
+        highlight.style.transform = `translateY(${nextIndex * STEP_GAP}px)`;
+        dot.style.transform = `translate(-50%, ${DOT_OFFSET + nextIndex * STEP_GAP}px)`;
     }
 
-    function tick() {
-        activate(index);
-        index = (index + 1) % steps.length;
+    function resetCycle() {
+        highlight.style.opacity = '0';
+        dot.style.opacity = '0';
+        resetTimer = window.setTimeout(() => {
+            // Jump to the first row with no animation, then fade the marker back in.
+            highlight.style.transition = 'none';
+            dot.style.transition = 'none';
+            setActive(0);
+            void highlight.offsetWidth;
+            highlight.style.transition = '';
+            dot.style.transition = '';
+            highlight.style.opacity = '1';
+            dot.style.opacity = '1';
+            startCycle();
+        }, RESET_FADE_MS);
     }
 
-    function restartFlow() {
-        window.clearInterval(timer);
-        index = 0;
-        tick();
-        timer = window.setInterval(tick, STEP_MS);
+    function startCycle() {
+        stopTimers();
+        setActive(0);
+
+        let nextIndex = 1;
+        const advance = () => {
+            if (nextIndex < steps.length) {
+                setActive(nextIndex);
+                nextIndex += 1;
+                stepTimer = window.setTimeout(advance, STEP_MS);
+                return;
+            }
+            cycleTimer = window.setTimeout(resetCycle, LAST_HOLD_MS);
+        };
+
+        cycleTimer = window.setTimeout(advance, PRE_ROLL_MS);
     }
 
-    window.restartFlow = restartFlow;
-    restartFlow();
+    // Used by the recorder: reset to the first row without sweeping the marker back up.
+    window.restartFlow = () => {
+        stopTimers();
+        highlight.style.transition = 'none';
+        dot.style.transition = 'none';
+        setActive(0);
+        void highlight.offsetWidth;
+        highlight.style.transition = '';
+        dot.style.transition = '';
+        highlight.style.opacity = '1';
+        dot.style.opacity = '1';
+        startCycle();
+    };
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (reduceMotion.matches) {
+        steps.forEach((step) => step.classList.add('is-active'));
+    } else {
+        startCycle();
+    }
 </script>
 </body>
 </html>
