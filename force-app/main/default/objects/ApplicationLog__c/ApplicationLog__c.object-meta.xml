@@ -9,4 +9,5 @@
     </nameField>
     <pluralLabel>Application Logs</pluralLabel>
     <sharingModel>ReadWrite</sharingModel>
+    <deploymentStatus>Deployed</deploymentStatus>
 </CustomObject>

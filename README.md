@@ -99,8 +99,9 @@ npm run format        # Prettier + prettier-plugin-apex (requires Java 11+)
 ```
 
 CI runs `npm run verify` on every push and pull request, plus a weekly cron so the baseline does not
-silently drift from the current release. A second job creates a scratch org, deploys the source and
-runs `RunLocalTests` when the `SFDX_AUTH_URL` secret is configured. Create it with:
+silently drift from the current release. A second job creates a scratch org, deploys the source,
+assigns `Architect_Stack_Admin` so the test runner can read the application log fields, and runs
+`RunLocalTests` when the `SFDX_AUTH_URL` secret is configured. Create it with:
 
 ```bash
 sf org display --target-org devhub --verbose --json | jq -r '.result.sfdxAuthUrl'

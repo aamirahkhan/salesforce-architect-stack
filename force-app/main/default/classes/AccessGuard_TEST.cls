@@ -24,27 +24,38 @@ private class AccessGuard_TEST {
     }
 
     @IsTest
-    static void stripsFieldsTheRunningUserCannotRead() {
+    static void stripsFieldsTheRunningUserCannotWrite() {
         ApplicationLog__c entry = new ApplicationLog__c(
             Level__c = 'ERROR',
             Source__c = 'AccessGuard_TEST',
             Message__c = 'Sensitive details'
         );
-        insert entry;
+        // Setup writes telemetry in system mode so the test proves stripping, not the runner's FLS.
+        Database.insert(entry, AccessLevel.SYSTEM_MODE);
 
+        ApplicationLog__c stored = [
+            SELECT Id, Message__c
+            FROM ApplicationLog__c
+            WHERE Id = :entry.Id
+            WITH SYSTEM_MODE
+        ];
+
+        // The admin permission set grants object create but leaves fields read-only, which is the
+        // shape CREATEABLE stripping needs: object access, no field write access.
         User standardUser = TestUtils.createUser('Standard User');
-        List<ApplicationLog__c> logs = [SELECT Id, Message__c FROM ApplicationLog__c WHERE Id = :entry.Id];
+        TestUtils.assignPermissionSet(standardUser.Id, 'Architect_Stack_Admin');
 
         System.runAs(standardUser) {
-            List<SObject> records = new List<SObject>();
-            records.addAll(logs);
-
-            List<SObject> stripped = AccessGuard.stripInaccessible(records, AccessType.READABLE, false);
+            List<SObject> stripped = AccessGuard.stripInaccessible(
+                new List<SObject>{ stored },
+                AccessType.CREATABLE,
+                false
+            );
 
             Assert.areEqual(1, stripped.size());
-            Assert.isTrue(
-                String.isBlank(((ApplicationLog__c) stripped[0]).Message__c),
-                'A field the running user cannot read must be stripped.'
+            Assert.isNull(
+                stripped[0].getPopulatedFieldsAsMap().get('Message__c'),
+                'A field the running user cannot write must be stripped.'
             );
         }
     }

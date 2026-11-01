@@ -16,9 +16,11 @@ private class LogService_TEST {
 
         Assert.areEqual(0, LogService.pendingCount());
 
+        // The assertion is about what was persisted, not about the test runner's field access.
         ApplicationLog__c entry = [
             SELECT Level__c, Source__c, Message__c, Exception_Type__c, Line_Number__c, Payload__c
             FROM ApplicationLog__c
+            WITH SYSTEM_MODE
             LIMIT 1
         ];
         Assert.areEqual('ERROR', entry.Level__c);
@@ -36,7 +38,7 @@ private class LogService_TEST {
         LogService.info('AccountService', 'Rating changed', account.Id);
         LogService.flush();
 
-        ApplicationLog__c entry = [SELECT Level__c, Record_Id__c FROM ApplicationLog__c LIMIT 1];
+        ApplicationLog__c entry = [SELECT Level__c, Record_Id__c FROM ApplicationLog__c WITH SYSTEM_MODE LIMIT 1];
         Assert.areEqual('INFO', entry.Level__c);
         Assert.areEqual(String.valueOf(account.Id), entry.Record_Id__c);
     }
@@ -46,6 +48,6 @@ private class LogService_TEST {
         LogService.reset();
         LogService.flush();
 
-        Assert.areEqual(0, [SELECT COUNT() FROM ApplicationLog__c]);
+        Assert.areEqual(0, [SELECT COUNT() FROM ApplicationLog__c WITH SYSTEM_MODE]);
     }
 }

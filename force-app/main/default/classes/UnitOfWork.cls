@@ -18,15 +18,17 @@ public inherited sharing class UnitOfWork {
     private List<SObject> dirtyRecords = new List<SObject>();
     private List<SObject> deletedRecords = new List<SObject>();
 
-    private AccessLevel accessLevel = AccessLevel.USER_MODE;
+    // Named dmlAccess, not accessLevel: Apex identifiers are case-insensitive, so a field called
+    // accessLevel would shadow the AccessLevel enum and make AccessLevel.USER_MODE unresolvable.
+    private AccessLevel dmlAccess = AccessLevel.USER_MODE;
 
     public UnitOfWork userMode() {
-        accessLevel = AccessLevel.USER_MODE;
+        dmlAccess = AccessLevel.USER_MODE;
         return this;
     }
 
     public UnitOfWork systemMode() {
-        accessLevel = AccessLevel.SYSTEM_MODE;
+        dmlAccess = AccessLevel.SYSTEM_MODE;
         return this;
     }
 
@@ -118,7 +120,7 @@ public inherited sharing class UnitOfWork {
         if (newRecords.isEmpty()) {
             return;
         }
-        List<Database.SaveResult> results = Database.insert(newRecords, false, accessLevel);
+        List<Database.SaveResult> results = Database.insert(newRecords, false, dmlAccess);
         assertSaveResults(results, newRecords, 'Insert');
     }
 
@@ -126,7 +128,7 @@ public inherited sharing class UnitOfWork {
         if (dirtyRecords.isEmpty()) {
             return;
         }
-        List<Database.SaveResult> results = Database.update(dirtyRecords, false, accessLevel);
+        List<Database.SaveResult> results = Database.update(dirtyRecords, false, dmlAccess);
         assertSaveResults(results, dirtyRecords, 'Update');
     }
 
@@ -134,7 +136,7 @@ public inherited sharing class UnitOfWork {
         if (deletedRecords.isEmpty()) {
             return;
         }
-        List<Database.DeleteResult> results = Database.delete(deletedRecords, false, accessLevel);
+        List<Database.DeleteResult> results = Database.delete(deletedRecords, false, dmlAccess);
         List<String> failures = new List<String>();
         for (Integer index = 0; index < results.size(); index++) {
             if (results[index].isSuccess()) {

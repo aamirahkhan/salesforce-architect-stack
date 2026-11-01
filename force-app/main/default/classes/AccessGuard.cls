@@ -74,27 +74,27 @@ public class AccessGuard {
         return stripped.isEmpty() ? null : stripped[0];
     }
 
-    private static void requireObjectAccess(SObjectType sObjectType, AccessType accessType) {
+    private static void requireObjectAccess(SObjectType sObjectType, AccessType requiredAccess) {
         if (sObjectType == null) {
             throw AppException.configuration('An SObject type is required.');
         }
 
         Schema.DescribeSObjectResult describe = sObjectType.getDescribe();
         Boolean allowed;
-        if (accessType == AccessType.READABLE) {
+        if (requiredAccess == AccessType.READABLE) {
             allowed = describe.isAccessible();
-        } else if (accessType == AccessType.CREATABLE) {
+        } else if (requiredAccess == AccessType.CREATABLE) {
             allowed = describe.isCreateable();
-        } else if (accessType == AccessType.UPDATABLE) {
+        } else if (requiredAccess == AccessType.UPDATABLE) {
             allowed = describe.isUpdateable();
-        } else if (accessType == AccessType.UPSERTABLE) {
+        } else if (requiredAccess == AccessType.UPSERTABLE) {
             allowed = describe.isCreateable() || describe.isUpdateable();
         } else {
             allowed = false;
         }
 
         if (!allowed) {
-            throw AppException.security('Insufficient ' + accessType.name() + ' access to ' + describe.getName());
+            throw AppException.security('Insufficient ' + requiredAccess.name() + ' access to ' + describe.getName());
         }
     }
 }

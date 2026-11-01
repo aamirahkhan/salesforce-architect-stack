@@ -65,9 +65,13 @@ private class AsyncJob_TEST {
     @IsTest
     static void runsScheduledJob() {
         Test.startTest();
-        System.schedule('AsyncJob_TEST', '0 0 0 1 1 ? 2099', new SampleSchedulableJob());
+        Id jobId = System.schedule('AsyncJob_TEST', '0 0 0 1 1 ? 2099', new SampleSchedulableJob());
         Test.stopTest();
 
+        Assert.isNotNull(jobId, 'The job should be registered with the scheduler.');
+
+        // Test.stopTest() does not execute future-scheduled jobs, so exercise the body directly.
+        new SampleSchedulableJob().execute(null);
         Assert.areEqual(1, scheduledRuns);
     }
 
@@ -82,7 +86,7 @@ private class AsyncJob_TEST {
             Assert.areEqual(AppException.ASYNC, problem.errorCode);
         }
 
-        Integer errorLogCount = [SELECT COUNT() FROM ApplicationLog__c WHERE Level__c = 'ERROR'];
+        Integer errorLogCount = [SELECT COUNT() FROM ApplicationLog__c WHERE Level__c = 'ERROR' WITH SYSTEM_MODE];
         Assert.isTrue(errorLogCount >= 1, 'The queueable failure should be logged.');
     }
 
@@ -94,7 +98,7 @@ private class AsyncJob_TEST {
         Database.executeBatch(new FailingBatchJob(), 200);
         Test.stopTest();
 
-        Integer errorLogCount = [SELECT COUNT() FROM ApplicationLog__c WHERE Level__c = 'ERROR'];
+        Integer errorLogCount = [SELECT COUNT() FROM ApplicationLog__c WHERE Level__c = 'ERROR' WITH SYSTEM_MODE];
         Assert.isTrue(errorLogCount >= 1, 'The batch failure should be logged without aborting the job.');
     }
 

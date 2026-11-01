@@ -28,11 +28,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
-        <field>ApplicationLog__c.Level__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
         <field>ApplicationLog__c.Line_Number__c</field>
         <readable>true</readable>
     </fieldPermissions>

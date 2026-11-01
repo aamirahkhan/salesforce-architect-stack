@@ -52,6 +52,14 @@ public abstract class TriggerHandler {
             return;
         }
 
+        // Trigger context flags are null outside a trigger, so check the flag that is safe to read
+        // everywhere before resolveContext() dereferences them.
+        if (!Trigger.isExecuting) {
+            throw AppException.configuration(
+                'TriggerHandler ' + getHandlerName() + ' can only run inside a trigger context.'
+            );
+        }
+
         context = resolveContext();
         if (context == null) {
             throw AppException.configuration(

@@ -35,13 +35,15 @@ public with sharing class AccountDomain extends SObjectDomain {
             allowed.add(country.toUpperCase());
         }
 
-        for (Account account : accounts()) {
-            if (String.isBlank(account.BillingCountry)) {
+        // The loop variable is named candidate, not account: Apex is case-insensitive, so a
+        // variable named account would shadow the Account token used below for BillingCountry.
+        for (Account candidate : accounts()) {
+            if (String.isBlank(candidate.BillingCountry)) {
                 continue;
             }
-            if (!allowed.contains(account.BillingCountry.trim().toUpperCase())) {
+            if (!allowed.contains(candidate.BillingCountry.trim().toUpperCase())) {
                 addFieldError(
-                    account,
+                    candidate,
                     Account.BillingCountry,
                     'Billing country must be one of: ' + String.join(allowedCountries, ', ')
                 );

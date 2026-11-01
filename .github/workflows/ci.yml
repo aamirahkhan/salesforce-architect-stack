@@ -76,6 +76,8 @@ jobs:
             --wait 20
       - name: Deploy source
         run: sf project deploy start --source-dir force-app --wait 30
+      - name: Assign framework permission set
+        run: sf org assign permset --name Architect_Stack_Admin --target-org ci
       - name: Run Apex tests
         run: sf apex run test --test-level RunLocalTests --code-coverage --result-format human --wait 30
       - name: Delete scratch org
