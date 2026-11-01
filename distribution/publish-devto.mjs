@@ -186,7 +186,7 @@ async function main() {
         tags,
         canonical_url: args.canonical || data.canonical_url || undefined,
         description: args.description || data.description || undefined,
-        cover_image: args.cover || data.cover_image || undefined,
+        main_image: args.cover || data.cover_image || data.main_image || undefined,
         series: args.series || data.series || undefined
     };
 

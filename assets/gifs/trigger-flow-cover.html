@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Trigger framework cover</title>
+<style>
+    :root {
+        --bg: #070c16;
+        --panel: rgba(15, 24, 40, 0.82);
+        --border: rgba(120, 150, 190, 0.18);
+        --text: #e8eef8;
+        --muted: #8da1bd;
+        --accent: #4aa3ff;
+        --green: #3ddc97;
+        --mono: "SFMono-Regular", "SF Mono", Menlo, Consolas, monospace;
+        --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+        margin: 0;
+        width: 1000px;
+        height: 420px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        overflow: hidden;
+    }
+
+    body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background:
+            radial-gradient(760px 360px at 12% -20%, rgba(74, 163, 255, 0.18), transparent 65%),
+            radial-gradient(620px 320px at 100% 120%, rgba(61, 220, 151, 0.09), transparent 60%);
+        pointer-events: none;
+    }
+
+    body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+        background-size: 42px 42px;
+        mask-image: radial-gradient(ellipse at 50% 40%, black 20%, transparent 82%);
+        pointer-events: none;
+    }
+
+    .frame {
+        position: relative;
+        z-index: 1;
+        height: 100%;
+        padding: 34px 44px 24px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .topline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 11px;
+    }
+
+    .eyebrow {
+        font-size: 10.5px;
+        letter-spacing: 0.18em;
+        font-weight: 700;
+        color: var(--accent);
+        text-transform: uppercase;
+    }
+
+    .badge {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.04em;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 4px 10px;
+        background: rgba(12, 20, 34, 0.7);
+    }
+
+    h1 {
+        margin: 0;
+        max-width: 800px;
+        font-size: 37px;
+        line-height: 1.08;
+        letter-spacing: -0.025em;
+        font-weight: 650;
+    }
+
+    .sub {
+        margin: 10px 0 0;
+        font-size: 14px;
+        line-height: 1.4;
+        color: var(--muted);
+        max-width: 760px;
+    }
+
+    .flow {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        margin-top: auto;
+        margin-bottom: 18px;
+    }
+
+    .step {
+        flex: 1;
+        min-width: 0;
+        height: 64px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+        padding: 0 13px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: var(--panel);
+    }
+
+    .step:first-child {
+        border-color: rgba(74, 163, 255, 0.72);
+        background: rgba(22, 37, 62, 0.96);
+        box-shadow: 0 0 0 1px rgba(74, 163, 255, 0.12), 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .step:last-child { border-color: rgba(61, 220, 151, 0.36); }
+
+    .name {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-family: var(--mono);
+        font-size: 12.5px;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .num {
+        flex: 0 0 19px;
+        height: 19px;
+        display: grid;
+        place-items: center;
+        border-radius: 5px;
+        font-size: 8.5px;
+        color: var(--muted);
+        border: 1px solid rgba(140, 165, 200, 0.22);
+        background: rgba(8, 14, 24, 0.7);
+    }
+
+    .step:first-child .num {
+        color: #06101f;
+        border-color: var(--accent);
+        background: var(--accent);
+    }
+
+    .step:last-child .num {
+        color: #04130d;
+        border-color: var(--green);
+        background: var(--green);
+    }
+
+    .desc {
+        padding-left: 26px;
+        font-size: 10.5px;
+        line-height: 1.2;
+        color: var(--muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .arrow {
+        flex: 0 0 30px;
+        display: grid;
+        place-items: center;
+        color: rgba(74, 163, 255, 0.55);
+        font-size: 14px;
+        font-family: var(--mono);
+    }
+
+    footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 9.5px;
+        letter-spacing: 0.06em;
+        color: rgba(141, 161, 189, 0.72);
+        text-transform: uppercase;
+    }
+
+    .footer-right { color: rgba(74, 163, 255, 0.85); }
+</style>
+</head>
+<body>
+<div class="frame">
+    <div class="topline">
+        <div class="eyebrow">Salesforce Architect Stack</div>
+        <div class="badge">before insert &middot; before update</div>
+    </div>
+
+    <h1>Rebuilding the Salesforce trigger framework</h1>
+    <p class="sub">A working Apex baseline: one-line triggers, metadata-driven bypass, a deliberate recursion contract, and user-mode data access.</p>
+
+    <div class="flow">
+        <div class="step">
+            <div class="name"><span class="num">01</span>AccountTrigger</div>
+            <div class="desc">one line, no logic</div>
+        </div>
+        <div class="arrow">&rarr;</div>
+        <div class="step">
+            <div class="name"><span class="num">02</span>TriggerDispatcher</div>
+            <div class="desc">log failures, rethrow</div>
+        </div>
+        <div class="arrow">&rarr;</div>
+        <div class="step">
+            <div class="name"><span class="num">03</span>TriggerHandler</div>
+            <div class="desc">bypass, recursion guard</div>
+        </div>
+        <div class="arrow">&rarr;</div>
+        <div class="step">
+            <div class="name"><span class="num">04</span>AccountService</div>
+            <div class="desc">access checks, DML</div>
+        </div>
+    </div>
+
+    <footer>
+        <span>21 Apex classes &middot; 10 test classes &middot; API 68.0</span>
+        <span class="footer-right">salesforce-architect-stack</span>
+    </footer>
+</div>
+</body>
+</html>

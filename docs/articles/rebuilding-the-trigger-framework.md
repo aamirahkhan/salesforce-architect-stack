@@ -3,7 +3,7 @@ title: Rebuilding the Salesforce trigger framework as a baseline
 description: A working Apex baseline with one-line triggers, metadata-driven bypass, a deliberate recursion contract, and user-mode data access.
 tags: salesforce, apex, architecture, testing
 series: Salesforce Architect Stack
-cover_image: https://raw.githubusercontent.com/aamirahkhan/salesforce-architect-stack/main/assets/gifs/trigger-flow.gif
+cover_image: https://raw.githubusercontent.com/aamirahkhan/salesforce-architect-stack/main/assets/gifs/trigger-flow-cover.png
 ---
 
 Every Salesforce project I have worked on eventually grows a trigger framework. It starts as a single trigger with an `if` statement, becomes an interface with a dispatcher, and ends with a static `Set<Id>` that someone is afraid to touch. The code is rarely the problem. The problem is the contract: when a handler runs, when it does not, what happens on re-entry, and who is allowed to bypass it.
