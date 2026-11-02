@@ -122,6 +122,14 @@ Paste the output into the repository secret `SFDX_AUTH_URL`. Never commit it.
 - No LWC, Aura or Flow layer is included. `AccountService.updateRating` is `@AuraEnabled` to show
   where that boundary belongs.
 
+## Writing
+
+The architecture note behind this baseline lives on the canonical site —
+[Rebuilding the Salesforce trigger framework as a baseline](https://aamirahkhan.github.io/salesforce-architect-stack/articles/rebuilding-the-trigger-framework/) —
+and is cross-posted to [Dev.to](https://dev.to/aamirahkhan/rebuilding-the-salesforce-trigger-framework-as-a-baseline-2jhi)
+with a canonical link back to the original. [distribution/README.md](distribution/README.md) records how each
+channel is published and which ones are still manual.
+
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md)

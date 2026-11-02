@@ -25,7 +25,8 @@ the original:
 
 1. **Canonical** — [aamirahkhan.github.io/salesforce-architect-stack](https://aamirahkhan.github.io/salesforce-architect-stack/articles/rebuilding-the-trigger-framework/).
    Automated: push to `main`.
-2. **Dev.to** — publish with `canonical_url` pointing at the original. Automated.
+2. **Dev.to** — [published](https://dev.to/aamirahkhan/rebuilding-the-salesforce-trigger-framework-as-a-baseline-2jhi)
+   with `canonical_url` pointing at the original. Automated by `distribution/publish-devto.mjs`.
 3. **LinkedIn Article** — paste the article, link back to the canonical URL. Manual.
 4. **Medium** — import or paste, linking back. Manual.
 5. **Trailblazer Community** — post a shorter discussion version in a relevant group, inviting
