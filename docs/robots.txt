@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://aamirahkhan.github.io/salesforce-architect-stack/sitemap.xml

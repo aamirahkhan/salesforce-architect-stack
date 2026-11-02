@@ -1,16 +1,21 @@
 ---
+layout: article
 title: Rebuilding the Salesforce trigger framework as a baseline
 description: A working Apex baseline with one-line triggers, metadata-driven bypass, a deliberate recursion contract, and user-mode data access.
-tags: salesforce, apex, architecture, testing
+tags: [salesforce, apex, architecture, testing]
 series: Salesforce Architect Stack
-cover_image: https://raw.githubusercontent.com/aamirahkhan/salesforce-architect-stack/main/assets/gifs/trigger-flow-cover.png
+date: 2026-11-02
+permalink: /articles/rebuilding-the-trigger-framework/
+image: /assets/gifs/trigger-flow-cover.png
+cover_image: https://aamirahkhan.github.io/salesforce-architect-stack/assets/gifs/trigger-flow-cover.png
+canonical_url: https://aamirahkhan.github.io/salesforce-architect-stack/articles/rebuilding-the-trigger-framework/
 ---
 
 Every Salesforce project I have worked on eventually grows a trigger framework. It starts as a single trigger with an `if` statement, becomes an interface with a dispatcher, and ends with a static `Set<Id>` that someone is afraid to touch. The code is rarely the problem. The problem is the contract: when a handler runs, when it does not, what happens on re-entry, and who is allowed to bypass it.
 
 This article walks through the baseline I built to stop rebuilding that contract on every project. It is deliberately small: 21 production Apex classes, 10 test classes, one trigger, custom metadata for configuration, and a permission set. The interesting parts are the decisions, not the class count.
 
-![Animated request flow from AccountTrigger through TriggerDispatcher, TriggerHandler, AccountDomain, AccountService and LogService](https://raw.githubusercontent.com/aamirahkhan/salesforce-architect-stack/main/assets/gifs/trigger-flow-v2.gif)
+![Animated request flow from AccountTrigger through TriggerDispatcher, TriggerHandler, AccountDomain, AccountService and LogService](/salesforce-architect-stack/assets/gifs/trigger-flow-v2.gif)
 
 ## The requirements
 

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="{{ site.lang | default: 'en' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  {%- assign is_article = false -%}
+  {%- if page.layout == 'article' -%}{%- assign is_article = true -%}{%- endif -%}
+  {%- assign meta_description = page.description | default: site.description | strip -%}
+  {%- assign canonical = site.url | append: site.baseurl | append: page.url -%}
+  {%- assign social_image = page.image | default: '/assets/gifs/trigger-flow-cover.png' -%}
+
+  <title>{% if page.title and page.layout != 'home' %}{{ page.title }} · {{ site.title }}{% else %}{{ site.title }} — {{ site.tagline }}{% endif %}</title>
+  <meta name="description" content="{{ meta_description }}">
+  <meta name="author" content="{{ site.author.name }}">
+  <link rel="canonical" href="{{ canonical }}">
+  <meta name="theme-color" content="#070c16">
+
+  <meta property="og:site_name" content="{{ site.title }}">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:type" content="{% if is_article %}article{% else %}website{% endif %}">
+  <meta property="og:title" content="{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}">
+  <meta property="og:description" content="{{ meta_description }}">
+  <meta property="og:url" content="{{ canonical }}">
+  <meta property="og:image" content="{{ social_image | absolute_url }}">
+  {%- if is_article %}
+  <meta property="article:published_time" content="{{ page.date | date_to_xmlschema }}">
+  <meta property="article:author" content="{{ site.author.name }}">
+  {%- for tag in page.tags %}
+  <meta property="article:tag" content="{{ tag }}">
+  {%- endfor %}
+  {%- endif %}
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{% if page.title %}{{ page.title }}{% else %}{{ site.title }}{% endif %}">
+  <meta name="twitter:description" content="{{ meta_description }}">
+  <meta name="twitter:image" content="{{ social_image | absolute_url }}">
+
+  <link rel="icon" href="{{ '/assets/favicon.svg' | relative_url }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ '/assets/site.css' | relative_url }}">
+
+  {%- if is_article %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": {{ page.title | jsonify }},
+    "description": {{ meta_description | jsonify }},
+    "image": {{ social_image | absolute_url | jsonify }},
+    "datePublished": {{ page.date | date_to_xmlschema | jsonify }},
+    "dateModified": {{ page.last_modified_at | default: page.date | date_to_xmlschema | jsonify }},
+    "author": {
+      "@type": "Person",
+      "name": {{ site.author.name | jsonify }},
+      "url": {{ site.author.url | jsonify }}
+    },
+    "publisher": {
+      "@type": "Person",
+      "name": {{ site.author.name | jsonify }},
+      "url": {{ site.author.url | jsonify }}
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": {{ canonical | jsonify }}
+    }
+  }
+  </script>
+  {%- endif %}
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="wrap site-header-inner">
+      <a class="wordmark" href="{{ '/' | relative_url }}" aria-label="{{ site.title }} home">
+        <span class="wordmark-dot" aria-hidden="true"></span>
+        <span>Salesforce Architect Stack</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <a href="{{ '/' | relative_url }}#writing">Writing</a>
+        <a href="{{ site.repo.url }}">Source</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    {{ content }}
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap site-footer-inner">
+      <p>{{ site.title }} · {{ site.tagline }}</p>
+      <p>
+        <a href="{{ site.repo.url }}">{{ site.repo.label }}</a>
+        <span aria-hidden="true">·</span>
+        <span>&copy; {{ 'now' | date: '%Y' }} {{ site.author.name }}</span>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

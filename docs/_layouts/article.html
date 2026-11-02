@@ -1,0 +1,38 @@
+---
+layout: default
+---
+{%- assign reading_minutes = content | number_of_words | divided_by: 220.0 | ceil -%}
+<article class="article">
+  <header class="article-header">
+    <p class="eyebrow">Architecture note</p>
+    <h1>{{ page.title }}</h1>
+    {%- if page.description %}
+    <p class="lede">{{ page.description }}</p>
+    {%- endif %}
+    <div class="byline">
+      <span>{{ site.author.name }}</span>
+      <span aria-hidden="true">/</span>
+      <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: '%-d %B %Y' }}</time>
+      <span aria-hidden="true">/</span>
+      <span>{{ reading_minutes }} min read</span>
+    </div>
+  </header>
+
+  <div class="article-body">
+    <div class="prose">
+      {{ content }}
+    </div>
+
+    <footer class="article-footer">
+      <div class="tag-row" aria-label="Tags">
+        {%- for tag in page.tags %}
+        <span class="tag">{{ tag }}</span>
+        {%- endfor %}
+      </div>
+      <div class="article-links">
+        <a href="{{ site.repo.url }}">Read the source</a>
+        <a href="{{ '/' | relative_url }}#writing">All writing</a>
+      </div>
+    </footer>
+  </div>
+</article>

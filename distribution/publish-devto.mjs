@@ -7,6 +7,10 @@
  * are UI/editorial only, and Medium stopped issuing integration tokens. Keeping the
  * publisher small and local avoids pretending those channels can be automated.
  *
+ * The canonical article lives on GitHub Pages. Article bodies use root-relative image
+ * paths so the same Markdown renders there; this script makes those URLs absolute before
+ * sending them to Dev.to, where a root-relative path would resolve against dev.to.
+ *
  * Auth: DEVTO_API_KEY, or a .devto-key file at the repository root. The key is read once,
  * sent only to api.dev.to, and never printed — not even in --dry-run output.
  */
@@ -27,13 +31,14 @@ Usage:
 
 Options:
   --file <path>         Markdown file to publish (required unless --help)
+  --id <articleId>      Update an existing Dev.to article instead of creating one
   --title <text>        Override the title (otherwise front matter "title")
   --tags <a,b>          Override tags (otherwise front matter "tags")
   --canonical <url>     Canonical URL of the original article
   --description <text>  SEO description (otherwise front matter "description")
   --cover <url>         Cover image URL (otherwise front matter "cover_image")
   --series <name>       Dev.to series name
-  --draft               Create as a draft instead of publishing
+  --draft               Create or update as a draft instead of publishing
   --dry-run             Print the request payload without calling the API
   --help                Show this help
 
@@ -71,6 +76,14 @@ function parseArgs(argv) {
             case '--file':
                 args.file = next();
                 break;
+            case '--id': {
+                const value = next();
+                if (!/^\d+$/.test(value)) {
+                    throw new Error('--id must be a numeric Dev.to article id');
+                }
+                args.id = value;
+                break;
+            }
             case '--title':
                 args.title = next();
                 break;
@@ -125,13 +138,39 @@ function splitFrontMatter(markdown) {
             continue;
         }
         const key = line.slice(0, separator).trim();
-        const value = line.slice(separator + 1).trim().replace(/^["']|["']$/g, '');
-        if (key) {
-            data[key] = value;
+        const rawValue = line.slice(separator + 1).trim();
+        if (!key) {
+            continue;
         }
+        if (rawValue.startsWith('[') && rawValue.endsWith(']')) {
+            data[key] = rawValue
+                .slice(1, -1)
+                .split(',')
+                .map((item) => item.trim().replace(/^["']|["']$/g, ''))
+                .filter(Boolean);
+            continue;
+        }
+        data[key] = rawValue.replace(/^["']|["']$/g, '');
     }
 
     return { data, body: normalized.slice(end + 4).trim() };
+}
+
+/**
+ * Makes site-root paths absolute against the canonical article's origin. Dev.to would
+ * otherwise resolve `/salesforce-architect-stack/assets/...` against dev.to itself.
+ */
+function absolutizeBodyUrls(body, canonicalUrl) {
+    if (!canonicalUrl) {
+        return body;
+    }
+    const origin = new URL(canonicalUrl).origin;
+    return body
+        .replace(/\]\((\/(?!\/)[^)\s]+)\)/g, (match, pathname) => `](${origin}${pathname})`)
+        .replace(
+            /(\bsrc=["'])(\/(?!\/)[^"']+)(["'])/g,
+            (match, prefix, pathname, suffix) => `${prefix}${origin}${pathname}${suffix}`
+        );
 }
 
 async function resolveApiKey() {
@@ -166,7 +205,7 @@ async function main() {
     }
 
     const markdown = await readFile(args.file, 'utf8');
-    const { data, body } = splitFrontMatter(markdown);
+    const { data, body: rawBody } = splitFrontMatter(markdown);
 
     const title = args.title || data.title;
     if (!title) {
@@ -174,17 +213,28 @@ async function main() {
         process.exit(1);
     }
 
+    const frontMatterTags = Array.isArray(data.tags) ? data.tags : (data.tags || '').split(',');
     const tags = (args.tags.length > 0
         ? args.tags
-        : (data.tags || '').split(',').map((tag) => tag.trim()).filter(Boolean)
+        : frontMatterTags.map((tag) => tag.trim()).filter(Boolean)
     ).slice(0, MAX_TAGS);
+
+    const canonicalUrl = args.canonical || data.canonical_url;
+    if (canonicalUrl) {
+        try {
+            new URL(canonicalUrl);
+        } catch {
+            console.error(`Error: canonical URL is not absolute: ${canonicalUrl}`);
+            process.exit(1);
+        }
+    }
 
     const article = {
         title,
-        body_markdown: body,
+        body_markdown: absolutizeBodyUrls(rawBody, canonicalUrl),
         published: !args.draft,
         tags,
-        canonical_url: args.canonical || data.canonical_url || undefined,
+        canonical_url: canonicalUrl || undefined,
         description: args.description || data.description || undefined,
         main_image: args.cover || data.cover_image || data.main_image || undefined,
         series: args.series || data.series || undefined
@@ -203,8 +253,9 @@ async function main() {
         process.exit(1);
     }
 
-    const response = await fetch(API_URL, {
-        method: 'POST',
+    const endpoint = args.id ? `${API_URL}/${args.id}` : API_URL;
+    const response = await fetch(endpoint, {
+        method: args.id ? 'PUT' : 'POST',
         headers: {
             'Content-Type': 'application/json',
             'User-Agent': USER_AGENT,
@@ -229,7 +280,8 @@ async function main() {
         process.exit(1);
     }
 
-    console.log(`${args.draft ? 'Draft created' : 'Published'}: ${created.url}`);
+    const action = args.draft ? 'Draft saved' : 'Published';
+    console.log(`${action}: ${created.url}`);
     console.log(`Article id: ${created.id}`);
 }
 

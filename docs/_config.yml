@@ -1,0 +1,30 @@
+title: Salesforce Architect Stack
+tagline: Architecture notes from a working Apex baseline
+description: >-
+  Notes on layered Apex, metadata-driven trigger control, user-mode data access, and
+  the decisions behind a small owned Salesforce baseline.
+url: https://aamirahkhan.github.io
+baseurl: /salesforce-architect-stack
+lang: en
+timezone: UTC
+
+author:
+  name: Aamir Khan
+  url: https://github.com/aamirahkhan
+
+repo:
+  label: aamirahkhan/salesforce-architect-stack
+  url: https://github.com/aamirahkhan/salesforce-architect-stack
+
+markdown: kramdown
+highlighter: rouge
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# The architecture notes and ADRs live in the repository for contributors; they are
+# not part of the published site, which carries the articles and their assets.
+exclude:
+  - ARCHITECTURE.md
+  - CODING-STANDARDS.md
+  - adr/

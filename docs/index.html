@@ -1,0 +1,56 @@
+---
+layout: default
+description: Notes on layered Apex, metadata-driven trigger control, user-mode data access, and the decisions behind a small owned Salesforce baseline.
+---
+<section class="hero wrap">
+  <p class="eyebrow">Architecture notes</p>
+  <h1>A Salesforce baseline you can read in one sitting.</h1>
+  <p class="hero-lede">
+    One owned framework instead of folklore: a one-line trigger contract, metadata-driven
+    bypass, a deliberate recursion rule, and data access that is secure by default. Written
+    down, tested, and small enough to review.
+  </p>
+  <div class="hero-actions">
+    <a class="button" href="{{ '/articles/rebuilding-the-trigger-framework/' | relative_url }}">Read the article</a>
+    <a class="button button-ghost" href="{{ site.repo.url }}">Browse the source</a>
+  </div>
+</section>
+
+<section class="section wrap" id="writing">
+  <div class="section-head">
+    <h2>Writing</h2>
+  </div>
+  <a class="card" href="{{ '/articles/rebuilding-the-trigger-framework/' | relative_url }}">
+    <p class="card-meta">2 November 2026 · Salesforce · Apex · Architecture</p>
+    <h3>Rebuilding the Salesforce trigger framework as a baseline</h3>
+    <p>
+      A working Apex baseline with one-line triggers, metadata-driven bypass, a deliberate
+      recursion contract, and user-mode data access — plus what the validation actually caught.
+    </p>
+    <span class="card-link">Read the article →</span>
+  </a>
+</section>
+
+<section class="inside wrap">
+  <div class="section-head">
+    <h2>What the baseline covers</h2>
+  </div>
+  <div class="inside-grid">
+    <div class="inside-item">
+      <h3>One entry point</h3>
+      <p>Dispatchers and handlers keep ordering, context and recursion out of trigger files.</p>
+    </div>
+    <div class="inside-item">
+      <h3>Secure by default</h3>
+      <p>Every query and DML call runs in user mode, so missing access fails visibly.</p>
+    </div>
+    <div class="inside-item">
+      <h3>Bypass without a deployment</h3>
+      <p>A metadata kill switch and a permission-based bypass for controlled data loads.</p>
+    </div>
+    <div class="inside-item">
+      <h3>Observable failures</h3>
+      <p>Record-based logging that is still there after the debug log is gone.</p>
+    </div>
+  </div>
+</section>
